@@ -1,3 +1,34 @@
+applications:
+  app:
+    type: php:8.2
+    disk: 1024
+
+    runtime:
+      extensions:
+        - pdo_pgsql
+        - intl
+        - opcache
+
+    dependencies:
+      php:
+        composer/composer: "^2"
+
+    relationships:
+      database: "db:postgresql"
+
+    web:
+      locations:
+        "/":
+          root: "public"
+          passthru: "/index.php"
+
+    hooks:
+      build: |
+        set -e
+        composer install --no-dev --prefer-dist --optimize-autoloader
+        php bin/console cache:clear
+      deploy: |
+        php bin/console doctrine:migrations:migrate --no-interaction
 name: app
 
 type: php:8.2

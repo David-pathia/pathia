@@ -1,3 +1,7 @@
+services:
+  db:
+    type: postgresql:15
+    disk: 2048
 db:
   type: postgresql:15
   disk: 2048
