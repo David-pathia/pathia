@@ -37,9 +37,15 @@ class RegistrationController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
-            // do anything else you need here, like send an email
+            //message flash
+            $this->addFlash('success', 'Votre compte PathIA a été créé avec succès. Initialisation du protocole d\'abonnement...');
 
-            return $security->login($user, AppAuthenticator::class, 'main');
+            // On connecte l'utilisateur
+            $security->login($user, AppAuthenticator::class, 'main');
+
+
+            // AU LIEU de rediriger vers l'accueil, on l'envoie vers les offres
+            return $this->redirectToRoute('app_pricing');
         }
 
         return $this->render('registration/register.html.twig', [

@@ -1,3 +1,120 @@
-body {
-    background-color: skyblue;
+/* Supprime les marges du navigateur */
+html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100vh;
+    background-color: #0B0C10; /* Le noir profond du thème PathIA */
+}
+
+/* Optionnel : Supprime les marges du container si vous en utilisez un */
+.pricing-container {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+}
+
+
+
+
+:root {
+    --stark-red: #C1121F;
+    --stark-gold: #FDF0D5;
+    --stark-bg: #0B0C10;
+}
+
+:root {
+    --stark-red: #C1121F;
+    --stark-gold: #FDF0D5;
+    --stark-bg: #0B0C10;
+}
+
+/* Le conteneur parent qui aligne les cartes */
+.pricing-grid {
+    display: flex;
+    flex-wrap: wrap; /* Permet de passer à la ligne sur mobile */
+    justify-content: center; /* Centre les cartes horizontalement */
+    gap: 30px; /* Espace uniforme entre les cartes (plus moderne que margin) */
+    padding: 40px 20px; /* Marge interne pour ne pas coller aux bords de l'écran */
+}
+
+.card-stark {
+    background: linear-gradient(145deg, #1a1a1a, #050505);
+    border: 1px solid #333;
+    border-radius: 8px;
+    width: 300px;
+    min-height: 500px;
+    display: flex;
+    flex-direction: column;
+    padding: 25px; /* Espace à l'intérieur de la carte */
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+
+    /* Optionnel : si vous ne voulez pas utiliser 'gap', décommentez la ligne suivante */
+    /* margin: 15px; */
+}
+
+.card-stark:hover {
+    transform: translateY(-10px); /* Soulèvement au survol */
+    border-color: var(--stark-red);
+    box-shadow: 0 0 25px rgba(193, 18, 31, 0.4);
+}
+
+.pricing-container {
+    background-color: var(--stark-bg);
+    min-height: 100vh;
+    padding: 60px 0;
+    color: white;
+}
+
+
+
+.price-tag {
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: var(--stark-gold);
+}
+
+.price-tag span {
+    font-size: 1rem;
+    color: #666;
+}
+
+.feature-list {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+}
+
+.feature-list li {
+    padding: 10px 0;
+    border-bottom: 1px dashed #222;
+    font-size: 0.9rem;
+    color: #ccc;
+}
+
+.feature-list li::before {
+    content: "▶";
+    color: var(--stark-red);
+    margin-right: 10px;
+    font-size: 0.8rem;
+}
+
+.btn-protocol {
+    display: block;
+    background: var(--stark-red);
+    color: white;
+    text-align: center;
+    padding: 12px;
+    text-decoration: none;
+    font-weight: bold;
+    letter-spacing: 2px;
+    clip-path: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%);
+    transition: 0.3s;
+}
+
+.btn-protocol:hover {
+    background: #ff0000;
+    color: white;
+    box-shadow: 0 0 15px var(--stark-red);
 }
