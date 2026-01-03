@@ -1,4 +1,3 @@
 services:
   db:
     type: postgresql:15
-    disk: 2048

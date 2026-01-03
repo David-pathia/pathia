@@ -1,8 +1,7 @@
 applications:
   app:
     type: php:8.2
-    disk: 1024
-
+    
     runtime:
       extensions:
         - pdo_pgsql
