@@ -2,15 +2,15 @@ applications:
   app:
     type: php:8.2
 
-    # Configuration des variables d'environnement
+    # Configuration des variables d'environnement globales
     variables:
       env:
         APP_ENV: prod
         APP_DEBUG: 0
-        # Simulation d'une DB durant le build pour éviter l'erreur de connexion
+        # Simulation d'une DB durant le build pour éviter les erreurs de compilation
         DATABASE_URL: "sqlite:///:memory:"
 
-    # Rendre var/ writable (cache, logs, asset-mapper)
+    # Rendre var/ accessible en écriture pour le cache et les logs
     mounts:
       "var":
         source: local
@@ -27,6 +27,7 @@ applications:
       php:
         composer/composer: "^2"
 
+    # Lien avec le service de base de données défini dans services.yaml
     relationships:
       database: "db:postgresql"
 
@@ -39,14 +40,20 @@ applications:
     hooks:
       build: |
         set -e
-        # Installation des dépendances sans les outils de dev
+        # 1. Installation des dépendances sans les outils de développement
         composer install --no-dev --prefer-dist --optimize-autoloader
         
-        # Nettoyage et préchauffage du cache avec la DB simulée (évite l'erreur 255)
+        # 2. Préchauffage du cache en utilisant la DB simulée
+        # Cela permet de figer les routes et les services sans avoir accès à Postgres
         DATABASE_URL="sqlite:///:memory:" php bin/console cache:clear --no-warmup
         DATABASE_URL="sqlite:///:memory:" php bin/console cache:warmup
 
       deploy: |
         set -e
-        # Ici, la vraie DATABASE_URL injectée par le relationship est utilisée
+        # 3. CRUCIAL : Suppression du cache de build
+        # On force Symfony à reconstruire son container pour qu'il détecte 
+        # enfin la vraie DATABASE_URL (PostgreSQL) fournie par Upsun.
+        rm -rf var/cache/prod
+        
+        # 4. Exécution des migrations sur la vraie base PostgreSQL
         php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
