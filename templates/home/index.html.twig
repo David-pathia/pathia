@@ -1,20 +1,33 @@
+{# templates/home/index.html.twig #}
 {% extends 'base.html.twig' %}
 
-{% block title %}Hello HomeController!{% endblock %}
-
 {% block body %}
-<style>
-    .example-wrapper { margin: 1em auto; max-width: 800px; width: 95%; font: 18px/1.5 sans-serif; }
-    .example-wrapper code { background: #F5F5F5; padding: 2px 6px; }
-</style>
-
-<div class="example-wrapper">
-    <h1>Hello {{ controller_name }}! ✅</h1>
-
-    This friendly message is coming from:
-    <ul>
-        <li>Your controller at <code>/Users/davidlacan/Documents/pathia-site/pathia/src/Controller/HomeController.php</code></li>
-        <li>Your template at <code>/Users/davidlacan/Documents/pathia-site/pathia/templates/home/index.html.twig</code></li>
-    </ul>
-</div>
+    <div class="row align-items-center" style="min-height: 70vh;">
+        <div class="col-md-6">
+            <h1 class="display-3 fw-bold mb-4" style="color: var(--stark-gold)">
+                DÉPLOYEZ VOTRE <br><span style="color: var(--stark-red)">ARMURE IA</span>
+            </h1>
+            <p class="lead mb-5" style="opacity: 0.8">
+                PathIA n'est pas une simple formation. C'est un centre d'entraînement pour les praticiens qui veulent maîtriser les protocoles de demain. Veille technologique, outils pédagogiques et intelligence artificielle fusionnent pour booster votre productivité.
+            </p>
+            <div class="d-flex gap-3">
+                <a href="{{ path('app_pricing') }}" class="btn btn-danger btn-lg px-5 py-3 fw-bold"
+                   style="clip-path: polygon(0 0, 90% 0, 100% 100%, 10% 100%); background-color: var(--stark-red)">
+                    VOIR LES PROTOCOLES
+                </a>
+                {% if not app.user %}
+                    <a href="{{ path('app_register') }}" class="btn btn-outline-warning btn-lg px-5 py-3 fw-bold"
+                       style="clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%)">
+                        REJOINDRE L'UNITÉ
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-6 text-center">
+            {# Ici, on pourra mettre l'image du logo ou un effet de lueur circulaire #}
+            <div style="width: 300px; height: 300px; border-radius: 50%; background: radial-gradient(circle, var(--stark-red) 0%, transparent 70%); margin: auto; display: flex; align-items: center; justify-content: center; box-shadow: 0 0 50px var(--stark-red)">
+                <img src="{{ asset('images/logo_pathIA.jpg') }}" alt="Logo" style="width: 80%; border-radius: 10px;">
+            </div>
+        </div>
+    </div>
 {% endblock %}

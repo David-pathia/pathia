@@ -1,34 +1,42 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Log in!{% endblock %}
+{% block title %}Authentification - PathIA{% endblock %}
 
 {% block body %}
-<form method="post">
-    {% if error %}
-        <div class="alert alert-danger">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
-    {% endif %}
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="stark-card">
+                <h2 class="mb-4 fw-bold" style="color: var(--stark-red)">
+                    <i class="bi bi-shield-lock me-2"></i>AUTHENTIFICATION
+                </h2>
 
-    {% if app.user %}
-        <div class="mb-3">
-            You are logged in as {{ app.user.userIdentifier }}, <a href="{{ logout_path() }}">Logout</a>
+                <form method="post">
+                    {% if error %}
+                        <div class="alert alert-danger" style="background: rgba(255,0,0,0.1); border: 1px solid red; color: white;">
+                            {{ error.messageKey|trans(error.messageData, 'security') }}
+                        </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <label class="stark-label">Utilisateur</label>
+                        <input type="email" value="{{ last_username }}" name="_username" id="username" class="form-control-stark" autocomplete="email" required autofocus>
+                    </div>
+                    <div class="mb-4">
+                        <label class="stark-label">Code Crypter</label>
+                        <input type="password" name="_password" id="password" class="form-control-stark" autocomplete="current-password" required>
+                    </div>
+
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                    <button class="btn-protocol w-100 py-3 mb-3" type="submit" style="background-color: var(--stark-red)">
+                        DÉVERROUILLER L'ARMURE
+                    </button>
+
+                    <div class="text-center">
+                        <a href="{{ path('app_register') }}" class="text-secondary small text-decoration-none">PAS ENCORE DE COMPTE ? CRÉER UN PROFIL</a>
+                    </div>
+                </form>
+            </div>
         </div>
-    {% endif %}
-
-    <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
-    <label for="inputEmail">Email</label>
-    <input type="email" value="{{ last_username }}" name="email" id="inputEmail" class="form-control" autocomplete="email" required autofocus>
-    <label for="inputPassword">Password</label>
-    <input type="password" name="password" id="inputPassword" class="form-control" autocomplete="current-password" required>
-    <input type="hidden" name="_csrf_token" data-controller="csrf-protection" value="{{ csrf_token('authenticate') }}">
-
-    <div class="checkbox mb-3">
-        <label>
-            <input type="checkbox" name="_remember_me"> Remember me
-        </label>
     </div>
-
-    <button class="btn btn-lg btn-primary" type="submit">
-        Sign in
-    </button>
-</form>
 {% endblock %}

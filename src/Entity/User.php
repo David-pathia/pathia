@@ -379,4 +379,17 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
         return $this;
     }
+    public function getActiveSubscription(): ?Subscription
+    {
+        foreach ($this->subscriptions as $subscription) {
+            // On utilise isEtat() qui renvoie true/false selon ton entité
+            if ($subscription->isEtat() === true) {
+                $now = new \DateTimeImmutable();
+                if ($subscription->getEndedAt() === null || $subscription->getEndedAt() > $now) {
+                    return $subscription;
+                }
+            }
+        }
+        return null;
+    }
 }

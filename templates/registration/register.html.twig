@@ -1,19 +1,35 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Register{% endblock %}
+{% block title %}Initialisation du Profil - PathIA{% endblock %}
 
 {% block body %}
-    <h1>Register</h1>
+    <div class="row justify-content-center">
+        <div class="col-md-5">
+            <div class="stark-card">
+                <h2 class="mb-4 fw-bold" style="color: var(--stark-gold)">
+                    <i class="bi bi-person-plus me-2"></i>INITIALISATION PROFIL
+                </h2>
+                <p class="text-secondary small mb-4">SYSTÈME : EN ATTENTE DE DONNÉES UTILISATEUR...</p>
 
-    {{ form_errors(registrationForm) }}
+                {{ form_start(registrationForm) }}
+                <div class="mb-3">
+                    <label class="stark-label">Identifiant (Email)</label>
+                    {{ form_widget(registrationForm.email, {'attr': {'class': 'form-control-stark', 'placeholder': 'NOM@DOMAINE.COM'}}) }}
+                </div>
+                <div class="mb-3">
+                    <label class="stark-label">Clé d'Accès (Password)</label>
+                    {{ form_widget(registrationForm.plainPassword, {'attr': {'class': 'form-control-stark'}}) }}
+                </div>
+                <div class="mb-4 d-flex align-items-center gap-2">
+                    {{ form_widget(registrationForm.agreeTerms) }}
+                    <label class="small text-secondary m-0">ACCEPTER LES PROTOCOLES DE SÉCURITÉ</label>
+                </div>
 
-    {{ form_start(registrationForm) }}
-        {{ form_row(registrationForm.email) }}
-        {{ form_row(registrationForm.plainPassword, {
-            label: 'Password'
-        }) }}
-        {{ form_row(registrationForm.agreeTerms) }}
-
-        <button type="submit" class="btn">Register</button>
-    {{ form_end(registrationForm) }}
+                <button type="submit" class="btn-protocol w-100 py-3">
+                    ACTIVER L'UNITÉ
+                </button>
+                {{ form_end(registrationForm) }}
+            </div>
+        </div>
+    </div>
 {% endblock %}

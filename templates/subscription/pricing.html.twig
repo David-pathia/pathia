@@ -12,29 +12,42 @@
 
             {# Grille d'abonnements aérée #}
             <div class="pricing-grid">
+                {# templates/subscription/pricing.html.twig #}
+
                 {% for plan in plans %}
                     <div class="card-stark">
-                        <div class="mb-4 text-center border-bottom border-secondary pb-3">
-                            <h3 style="color: var(--stark-gold); text-transform: uppercase; font-size: 1.2rem;">
-                                {{ plan.name }}
-                            </h3>
-                            <div style="font-size: 2.5rem; font-weight: bold; color: white;">
-                                {{ plan.price }}€<span style="font-size: 1rem; color: #777;">/mois</span>
-                            </div>
-                        </div>
+                        {# ... (nom et prix du plan) ... #}
 
-                        <ul class="list-unstyled flex-grow-1" style="color: #ccc; font-size: 0.95rem;">
+                        <ul class="feature-list">
                             {% for feature in plan.features %}
-                                <li class="mb-3">
-                                    <i class="bi bi-caret-right-fill text-danger me-2"></i>
+                                <li class="{% if is_granted('ACCESS_FEATURE', feature.name) %}text-success fw-bold{% endif %}">
                                     {{ feature.name }}
+                                    {% if is_granted('ACCESS_FEATURE', feature.name) %}
+                                        <i class="bi bi-check-circle-fill ms-2"></i> {# Icône "Débloqué" #}
+                                    {% endif %}
                                 </li>
                             {% endfor %}
                         </ul>
 
+                        <div class="mt-auto">
+                            {# Logique du bouton d'action #}
+                            {% set has_all_features = true %}
+                            {% for feature in plan.features %}
+                                {% if not is_granted('ACCESS_FEATURE', feature.name) %}
+                                    {% set has_all_features = false %}
+                                {% endif %}
+                            {% endfor %}
 
-                            INITIALISER_UPGRADE
-
+                            {% if has_all_features %}
+                                <button class="btn btn-secondary w-100 mt-auto" disabled>
+                                    PROTOCOLE ACTIF
+                                </button>
+                            {% else %}
+                                <a href="{{ path('app_subscribe_process', {'id': plan.id}) }}" class="btn-protocol w-100">
+                                    ACTIVER LE PLAN
+                                </a>
+                            {% endif %}
+                        </div>
                     </div>
                 {% endfor %}
             </div>

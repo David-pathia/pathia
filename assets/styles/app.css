@@ -1,83 +1,90 @@
-/* Supprime les marges du navigateur */
+/* ============================================================
+   PATHIA - STARK INDUSTRIES PROTOCOL CORE CSS
+   ============================================================ */
+
+/* 1. VARIABLES & RESET */
+:root {
+    --stark-red: #C1121F;
+    --stark-gold: #FDF0D5;
+    --stark-bg: #0B0C10;
+    --stark-card-bg: linear-gradient(145deg, #1a1a1a, #050505);
+}
+
 html, body {
     margin: 0;
     padding: 0;
     width: 100%;
     min-height: 100vh;
-    background-color: #0B0C10; /* Le noir profond du thème PathIA */
+    background-color: var(--stark-bg);
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/* Optionnel : Supprime les marges du container si vous en utilisez un */
-.pricing-container {
-    margin: 0;
-    padding: 0;
-    width: 100%;
+/* 2. NAVIGATION (NAVBAR) */
+.navbar-stark {
+    background: linear-gradient(90deg, #1a1a1a 0%, #000 100%);
+    border-bottom: 2px solid var(--stark-red);
+    padding: 1rem 2rem;
 }
 
-
-
-
-:root {
-    --stark-red: #C1121F;
-    --stark-gold: #FDF0D5;
-    --stark-bg: #0B0C10;
+.nav-link {
+    color: #fff !important;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
+    transition: 0.3s;
 }
 
-:root {
-    --stark-red: #C1121F;
-    --stark-gold: #FDF0D5;
-    --stark-bg: #0B0C10;
+.nav-link:hover { color: var(--stark-gold) !important; }
+
+.btn-auth {
+    border: 1px solid var(--stark-gold);
+    color: var(--stark-gold);
+    padding: 0.5rem 1.5rem;
+    text-decoration: none;
+    clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+    transition: 0.3s;
+    font-weight: bold;
+    font-size: 0.8rem;
 }
 
-/* Le conteneur parent qui aligne les cartes */
+.btn-auth:hover {
+    background: var(--stark-gold);
+    color: black;
+}
+
+/* 3. GRILLE DE PRIX (PRICING) */
 .pricing-grid {
     display: flex;
-    flex-wrap: wrap; /* Permet de passer à la ligne sur mobile */
-    justify-content: center; /* Centre les cartes horizontalement */
-    gap: 30px; /* Espace uniforme entre les cartes (plus moderne que margin) */
-    padding: 40px 20px; /* Marge interne pour ne pas coller aux bords de l'écran */
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 30px;
+    padding: 40px 20px;
 }
 
 .card-stark {
-    background: linear-gradient(145deg, #1a1a1a, #050505);
+    background: var(--stark-card-bg);
     border: 1px solid #333;
     border-radius: 8px;
     width: 300px;
     min-height: 500px;
     display: flex;
     flex-direction: column;
-    padding: 25px; /* Espace à l'intérieur de la carte */
+    padding: 25px;
     transition: all 0.3s ease;
     box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-
-    /* Optionnel : si vous ne voulez pas utiliser 'gap', décommentez la ligne suivante */
-    /* margin: 15px; */
 }
 
 .card-stark:hover {
-    transform: translateY(-10px); /* Soulèvement au survol */
+    transform: translateY(-10px);
     border-color: var(--stark-red);
     box-shadow: 0 0 25px rgba(193, 18, 31, 0.4);
 }
-
-.pricing-container {
-    background-color: var(--stark-bg);
-    min-height: 100vh;
-    padding: 60px 0;
-    color: white;
-}
-
-
 
 .price-tag {
     font-size: 2.5rem;
     font-weight: bold;
     color: var(--stark-gold);
-}
-
-.price-tag span {
-    font-size: 1rem;
-    color: #666;
 }
 
 .feature-list {
@@ -100,6 +107,51 @@ html, body {
     font-size: 0.8rem;
 }
 
+/* 4. FORMULAIRES & LOGIN/REGISTER (JARVIS INTERFACE) */
+.stark-card {
+    background: rgba(15, 15, 15, 0.9);
+    border: 1px solid var(--stark-red);
+    box-shadow: 0 0 20px rgba(193, 18, 31, 0.2);
+    padding: 2.5rem;
+    border-radius: 5px;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Effet laser vertical */
+.stark-card::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; width: 2px; height: 100%;
+    background: var(--stark-red);
+    box-shadow: 0 0 10px var(--stark-red);
+}
+
+.form-control-stark {
+    background: rgba(30, 30, 30, 0.8) !important;
+    border: 1px solid #444 !important;
+    color: var(--stark-gold) !important;
+    border-radius: 0 !important;
+    padding: 0.8rem !important;
+    transition: 0.3s;
+}
+
+.form-control-stark:focus {
+    border-color: var(--stark-gold) !important;
+    box-shadow: 0 0 10px rgba(253, 240, 213, 0.3) !important;
+    outline: none;
+}
+
+.stark-label {
+    color: #aaa;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+/* 5. BOUTON PROTOCOLE (STARK STYLE) */
 .btn-protocol {
     display: block;
     background: var(--stark-red);
@@ -111,10 +163,43 @@ html, body {
     letter-spacing: 2px;
     clip-path: polygon(5% 0%, 100% 0%, 95% 100%, 0% 100%);
     transition: 0.3s;
+    border: none;
+    width: 100%;
+    text-transform: uppercase;
 }
 
 .btn-protocol:hover {
     background: #ff0000;
     color: white;
     box-shadow: 0 0 15px var(--stark-red);
+    transform: scale(1.02);
 }
+
+.btn-protocol:disabled {
+    background: #444;
+    clip-path: none;
+    cursor: not-allowed;
+}
+
+/* 6. ALERTES SYSTEME (FLASH MESSAGES) */
+.stark-alert {
+    background: rgba(20, 20, 20, 0.95) !important;
+    border: none !important;
+    border-left: 5px solid var(--stark-red) !important;
+    color: #fff !important;
+    border-radius: 0 !important;
+    box-shadow: 0 0 15px rgba(193, 18, 31, 0.3);
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+}
+
+.alert-success {
+    border-left-color: #28a745 !important;
+    box-shadow: 0 0 15px rgba(40, 167, 69, 0.3) !important;
+}
+
+/* 7. UTILITAIRES */
+.text-gold { color: var(--stark-gold); }
+.text-red { color: var(--stark-red); }
