@@ -19,19 +19,33 @@ applications:
         - opcache
         - apcu
 
+    dependencies:
+      php:
+        composer/composer: "^2"
+
     relationships:
       database: "db:postgresql"
+
+    web:
+      locations:
+        "/":
+          root: "public"
+          passthru: "/index.php"
 
     hooks:
       build: |
         set -e
-        # On ajoute --no-scripts pour éviter le crash du cache:clear pendant le build
+        # Installation propre sans scripts pour éviter les erreurs de DB au build
         composer install --no-dev --prefer-dist --optimize-autoloader --no-scripts
 
       deploy: |
         set -e
-        # On nettoie le cache ici car la DB est enfin disponible
+        # Nettoyage du cache pour forcer la relecture des variables Upsun
         rm -rf var/cache/prod
+        
+        # Exécution des migrations sur PostgreSQL
+        # Le paquet config-reader va aider Doctrine à trouver la DATABASE_URL
         php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
+        
+        # Préchauffage final du cache en production
         php bin/console cache:clear
-# Rebuild forced
