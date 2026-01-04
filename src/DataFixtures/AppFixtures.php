@@ -3,6 +3,8 @@
 namespace App\DataFixtures;
 
 use App\Entity\Feature;
+use App\Entity\Newsletter;
+use App\Entity\NewsletterSource;
 use App\Entity\Subscription;
 use App\Entity\SubscriptionPlan;
 use App\Entity\User;
@@ -10,101 +12,157 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
-class AppFixtures extends Fixture
+final class AppFixtures extends Fixture
 {
-    private UserPasswordHasherInterface $hasher;
-
-    // On injecte le service de hachage de Symfony
-    public function __construct(UserPasswordHasherInterface $hasher)
-    {
-        $this->hasher = $hasher;
-    }
+    public function __construct(
+        private readonly UserPasswordHasherInterface $passwordHasher
+    ) {}
 
     public function load(ObjectManager $manager): void
     {
-        // 1. Définition des Services (Features)
-        $featuresData = [
-            'news_ia'    => 'Newsletter IA hebdomadaire',
-            'veille_reg' => 'Veille réglementaire & légale',
-            'veille_ped' => 'Veille pédagogique & outils',
-            'conf'       => 'Accès aux Conférences annuelles',
-            'replay'     => 'Accès aux Replays illimités',
-            'club'       => 'Accès au Club & Discord privé',
-            'meetup'     => '2 RDV exclusifs / an (Échanges Philo/Tech)',
-            'visio'      => '1h de Visio privée sur mesure'
-        ];
+        $now = new \DateTimeImmutable();
 
-        $featureEntities = [];
-        foreach ($featuresData as $key => $name) {
-            $feature = new Feature();
-            $feature->setName($name);
-            $manager->persist($feature);
-            $featureEntities[$key] = $feature;
-        }
+        // --------------------------
+        // FEATURES
+        // --------------------------
+        $fNewsletter = (new Feature())->setName('Newsletter IA hebdomadaire');
+        $fConf = (new Feature())->setName('Invitations conférences (4/an)');
+        $fVisio = (new Feature())->setName('Visio 45 minutes');
 
-        // 2. Configuration des Plans
-        $plansConfig = [
-            ['name' => 'L\'Essentiel Veille', 'price' => 15, 'features' => ['news_ia', 'veille_reg', 'veille_ped']],
-            ['name' => 'Le Praticien', 'price' => 35, 'features' => ['news_ia', 'veille_reg', 'veille_ped', 'conf', 'replay']],
-            ['name' => 'Le Club PathIA', 'price' => 65, 'features' => ['news_ia', 'veille_reg', 'veille_ped', 'conf', 'replay', 'club', 'meetup']],
-            ['name' => 'Expertise Duo', 'price' => 120, 'features' => ['news_ia', 'veille_reg', 'veille_ped', 'conf', 'replay', 'club', 'meetup', 'visio']],
-        ];
+        $manager->persist($fNewsletter);
+        $manager->persist($fConf);
+        $manager->persist($fVisio);
 
-        $allPlans = [];
-        foreach ($plansConfig as $config) {
-            $plan = new SubscriptionPlan();
-            $plan->setName($config['name']);
-            $plan->setPrice($config['price']);
-            $plan->setEnligne(true);
-            $plan->setDescription('Accès protocole ' . $config['name']);
-            foreach ($config['features'] as $fKey) {
-                $plan->addFeature($featureEntities[$fKey]);
-            }
-            $manager->persist($plan);
-            $allPlans[] = $plan;
-        }
+        // --------------------------
+        // PLANS
+        // --------------------------
+        // Abonnement 1 : 1 newsletter / mois - 12€
+        $planEssentiel = (new SubscriptionPlan())
+            ->setName('Essentiel Veille')
+            ->setPrice(12)
+            ->setDescription("1 newsletter / mois (veille réglementaire & IA)")
+            ->setEnligne(true)
+        ;
+        $planEssentiel->addFeature($fNewsletter);
 
-        // 3. CRÉATION DE L'ADMIN (Adminman)
-        $admin = new User();
-        $admin->setEmail('adminman@pathia.fr');
-        $admin->setRoles(['ROLE_ADMIN']);
-        $admin->setIsVerified(true);
+        // Abonnement 2 : newsletter + conférences (4/an) - 19€
+        $planPro = (new SubscriptionPlan())
+            ->setName('Veille + Conférences')
+            ->setPrice(19)
+            ->setDescription("Newsletter + invitations à une série de conférences (4/an)")
+            ->setEnligne(true)
+        ;
+        $planPro->addFeature($fNewsletter);
+        $planPro->addFeature($fConf);
 
-        // Hachage dynamique du mot de passe "password"
-        $admin->setPassword($this->hasher->hashPassword($admin, 'password'));
+        // Visio 45 min - 60€ (modélisé comme un plan)
+        $planVisio = (new SubscriptionPlan())
+            ->setName('Consulting Visio 45 minutes')
+            ->setPrice(60)
+            ->setDescription("1 visio de 45 minutes (conseil & audit rapide)")
+            ->setEnligne(true)
+        ;
+        $planVisio->addFeature($fVisio);
 
-        if (method_exists($admin, 'setCreatedAt')) {
-            $admin->setCreatedAt(new \DateTimeImmutable());
-        }
+        $manager->persist($planEssentiel);
+        $manager->persist($planPro);
+        $manager->persist($planVisio);
+
+        // --------------------------
+        // USERS
+        // --------------------------
+        $admin = (new User())
+            ->setEmail('admin@pathia.fr')
+            ->setRoles(['ROLE_ADMIN'])
+        ;
+        $admin->setPassword($this->passwordHasher->hashPassword($admin, 'password'));
+        $admin->setCreatedAt($now)->setUpdateAt($now);
+        $ironman = (new User())
+            ->setEmail('ironman@pathia.fr')
+            ->setRoles(['ROLE_USER'])
+        ;
+        $ironman->setPassword($this->passwordHasher->hashPassword($ironman, 'password'));
+        $ironman->setCreatedAt($now)->setUpdateAt($now);
+        $toto = (new User())
+            ->setEmail('toto@pathia.fr')
+            ->setRoles(['ROLE_USER'])
+        ;
+        $toto->setPassword($this->passwordHasher->hashPassword($toto, 'password'));
+        $toto->setCreatedAt($now)->setUpdateAt($now);
         $manager->persist($admin);
+        $manager->persist($ironman);
+        $manager->persist($toto);
 
-        // 4. CRÉATION DE L'USER (Ironman)
-        $user = new User();
-        $user->setEmail('ironman@pathia.fr');
-        $user->setRoles(['ROLE_USER']);
-        $user->setIsVerified(true);
+        // --------------------------
+        // SUBSCRIPTIONS
+        // --------------------------
+        // Ironman abonné (choix : plan Pro = newsletter + conf)
+        $subIronman = (new Subscription())
+            ->setName('Abonnement Ironman (test)')
+            ->setUser($ironman)
+            ->setSubscriptionplan($planPro)  // ou $planEssentiel si tu préfères
+            ->setEtat(true)
+            ->setStartedAt($now)
+            ->setEndedAt($now->modify('+30 days'))
+        ;
+        $manager->persist($subIronman);
 
-        // Hachage dynamique du mot de passe "password"
-        $user->setPassword($this->hasher->hashPassword($user, 'password'));
+        // Admin : pas de subscription (il reste admin)
+        // Toto : pas de subscription (non abonné)
 
-        if (method_exists($user, 'setCreatedAt')) {
-            $user->setCreatedAt(new \DateTimeImmutable());
-        }
-        $manager->persist($user);
+        // --------------------------
+        // NEWSLETTERS (3)
+        // --------------------------
+        $nl1 = (new Newsletter())
+            ->setTitle("Veille IA & Formation — Ce que 2026 change déjà pour les formateurs")
+            ->setSlug("veille-ia-formation-2026")
+            ->setExcerpt("L’IA transforme la formation : transparence, exigences qualité et bonnes pratiques. Voici l’essentiel pour anticiper les changements…")
+            ->setContent("Contenu complet premium : AI Act, RGPD, responsabilités pédagogiques, recommandations opérationnelles et check-list Qualiopi.\n\nConclusion : intégrer l’IA de façon responsable, traçable et stratégique.")
+            ->setIsPublished(true)
+            ->setPublishedAt($now->modify('-2 days'))
+        ;
+        $nl1->addSource((new NewsletterSource())
+            ->setLabel("Commission européenne — AI Act / stratégie numérique")
+            ->setUrl("https://digital-strategy.ec.europa.eu/")
+            ->setPublisher("Commission européenne")
+        );
+        $nl1->addSource((new NewsletterSource())
+            ->setLabel("CNIL — Intelligence artificielle & RGPD")
+            ->setUrl("https://www.cnil.fr/fr/intelligence-artificielle")
+            ->setPublisher("CNIL")
+        );
 
-        // 5. ATTRIBUTION D'UN ABONNEMENT À IRONMAN
-        $subscription = new Subscription();
-        $subscription->setUser($user);
-        $subscription->setSubscriptionplan($allPlans[0]);
-        $subscription->setName('Contrat Test Ironman');
-        $subscription->setStartedAt(new \DateTimeImmutable());
-        $subscription->setEndedAt((new \DateTimeImmutable())->modify('+1 month'));
-        $subscription->setEtat(true);
+        $nl2 = (new Newsletter())
+            ->setTitle("Qualiopi + IA — Comment documenter l’usage de l’IA sans se mettre en risque")
+            ->setSlug("qualio-ai-documenter-usage")
+            ->setExcerpt("Comment intégrer l’IA (supports, exercices, feedback) tout en restant conforme ? Voici une méthode simple et actionnable…")
+            ->setContent("Contenu complet premium : matrice 'outil / usage / données / risques / preuves', modèles de charte IA apprenants, et trame de justificatifs pour audit.")
+            ->setIsPublished(true)
+            ->setPublishedAt($now->modify('-1 day'))
+        ;
+        $nl2->addSource((new NewsletterSource())
+            ->setLabel("France Compétences — Références qualité / formation pro")
+            ->setUrl("https://www.francecompetences.fr/")
+            ->setPublisher("France Compétences")
+        );
 
-        if (method_exists($subscription, 'setCreatedAt')) {
-            $subscription->setCreatedAt(new \DateTimeImmutable());
-        }
-        $manager->persist($subscription);
+        $nl3 = (new Newsletter())
+            ->setTitle("Outils pédagogiques IA — 7 workflows concrets (sans bullshit) pour gagner du temps")
+            ->setSlug("outils-ia-workflows-formateurs")
+            ->setExcerpt("De la préparation de séances à la remédiation : 7 workflows IA utilisables dès demain, avec garde-fous et bonnes pratiques…")
+            ->setContent("Contenu complet premium : prompts structurés, modèles de grilles d’évaluation, génération de quiz, différenciation, et méthode d’anti-hallucination.")
+            ->setIsPublished(true)
+            ->setPublishedAt($now)
+        ;
+        $nl3->addSource((new NewsletterSource())
+            ->setLabel("Symfony UX / AssetMapper — bonnes pratiques front")
+            ->setUrl("https://symfony.com/doc/current/frontend.html")
+            ->setPublisher("Symfony")
+        );
+
+        $manager->persist($nl1);
+        $manager->persist($nl2);
+        $manager->persist($nl3);
 
         $manager->flush();
     }

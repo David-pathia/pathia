@@ -1,6 +1,7 @@
 doctrine:
 
     dbal:
+        url: '%env(resolve:DATABASE_URL)%'
         driver: 'pdo_pgsql'
         host: '%env(default::DATABASE_HOST)%'
         port: '%env(default::DATABASE_PORT)%'
