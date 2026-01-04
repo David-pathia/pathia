@@ -2,6 +2,14 @@ applications:
   app:
     type: php:8.2
 
+    # Configuration des variables d'environnement
+    variables:
+      env:
+        APP_ENV: prod
+        APP_DEBUG: 0
+        # Simulation d'une DB durant le build pour éviter l'erreur de connexion
+        DATABASE_URL: "sqlite:///:memory:"
+
     # Rendre var/ writable (cache, logs, asset-mapper)
     mounts:
       "var":
@@ -13,6 +21,7 @@ applications:
         - pdo_pgsql
         - intl
         - opcache
+        - apcu
 
     dependencies:
       php:
@@ -30,10 +39,14 @@ applications:
     hooks:
       build: |
         set -e
+        # Installation des dépendances sans les outils de dev
         composer install --no-dev --prefer-dist --optimize-autoloader
+        
+        # Nettoyage et préchauffage du cache avec la DB simulée (évite l'erreur 255)
+        DATABASE_URL="sqlite:///:memory:" php bin/console cache:clear --no-warmup
+        DATABASE_URL="sqlite:///:memory:" php bin/console cache:warmup
 
       deploy: |
+        set -e
+        # Ici, la vraie DATABASE_URL injectée par le relationship est utilisée
         php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
-        php bin/console cache:clear --env=prod
-        php bin/console cache:warmup --env=prod
-
