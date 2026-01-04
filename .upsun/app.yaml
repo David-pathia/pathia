@@ -6,6 +6,7 @@ applications:
       env:
         APP_ENV: "prod"
         APP_DEBUG: "0"
+        # Empêche Symfony Flex de lancer des auto-scripts via Composer sur Upsun
         SYMFONY_SKIP_AUTO_SCRIPTS: "1"
 
     relationships:
@@ -39,9 +40,10 @@ applications:
       build: |
         set -e
 
-        # Fake DATABASE_URL to prevent Doctrine crash during build
+        # Mock DB (la DB Upsun n'est pas dispo au build, évite les crash Doctrine)
         export DATABASE_URL="postgresql://user:pass@127.0.0.1:5432/dummy?serverVersion=15"
 
+        # Install dépendances sans scripts
         composer install \
           --no-dev \
           --prefer-dist \
@@ -50,7 +52,10 @@ applications:
           --no-scripts \
           --optimize-autoloader
 
-        # AssetMapper MUST run at build (public/ writable here)
+        # Importmap vendors (résout @hotwired/stimulus manquant)
+        php bin/console importmap:install --env=prod --no-interaction
+
+        # Compile AssetMapper (public/ est writable au build)
         php bin/console asset-map:compile --env=prod --no-interaction
 
       deploy: |
@@ -58,10 +63,11 @@ applications:
 
         rm -rf var/cache/prod
 
-        # Real DATABASE_URL from Upsun relationships
+        # Vraie DATABASE_URL depuis les relations Upsun (DB dispo au deploy)
         export DATABASE_URL="$(echo "$PLATFORM_RELATIONSHIPS" | base64 --decode | jq -r \
           '.database[0] | "postgresql://\(.username):\(.password)@\(.host):\(.port)/\(.path)?serverVersion=15&charset=utf8"')"
 
+        # Migrations + cache (pas d'écriture dans public/ ici)
         php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
         php bin/console cache:clear --env=prod --no-interaction
 
