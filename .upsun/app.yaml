@@ -1,73 +1,74 @@
 applications:
-  app:
-    type: php:8.2
+    app:
+        type: php:8.2
 
-    variables:
-      env:
-        APP_ENV: "prod"
-        APP_DEBUG: "0"
-        # Empêche Symfony Flex de lancer des auto-scripts via Composer sur Upsun
-        SYMFONY_SKIP_AUTO_SCRIPTS: "1"
+        variables:
+            env:
+                APP_ENV: "prod"
+                APP_DEBUG: "0"
+                SYMFONY_SKIP_AUTO_SCRIPTS: "1"
 
-    relationships:
-      database: "db:postgresql"
+        relationships:
+            database: "db:postgresql"
 
-    mounts:
-      "var":
-        source: local
-        source_path: var
+        mounts:
+            "var":
+                source: local
+                source_path: var
 
-    runtime:
-      extensions:
-        - pdo_pgsql
-        - intl
-        - opcache
-        - apcu
+        runtime:
+            extensions:
+                - pdo_pgsql
+                - intl
+                - opcache
+                - apcu
 
-    dependencies:
-      php:
-        composer/composer: "^2"
+        dependencies:
+            php:
+                composer/composer: "^2"
 
-    web:
-      locations:
-        "/":
-          root: "public"
-          passthru: "/index.php"
-          index:
-            - index.php
+        web:
+            locations:
+                "/":
+                    root: "public"
+                    passthru: "/index.php"
+                    index:
+                        - index.php
 
-    hooks:
-      build: |
-        set -e
+        hooks:
+            build: |
+                set -e
 
-        # Mock DB (la DB Upsun n'est pas dispo au build, évite les crash Doctrine)
-        export DATABASE_URL="postgresql://user:pass@127.0.0.1:5432/dummy?serverVersion=15"
+                # La DB Upsun n'est PAS disponible au build.
+                # On définit une DATABASE_URL dummy pour éviter que Symfony/Doctrine crash
+                # pendant importmap/asset-map/cache warmups éventuels.
+                export DATABASE_URL="postgresql://user:pass@127.0.0.1:5432/dummy?serverVersion=15&charset=utf8"
 
-        # Install dépendances sans scripts
-        composer install \
-          --no-dev \
-          --prefer-dist \
-          --no-interaction \
-          --no-progress \
-          --no-scripts \
-          --optimize-autoloader
+                composer install \
+                  --no-dev \
+                  --prefer-dist \
+                  --no-interaction \
+                  --no-progress \
+                  --no-scripts \
+                  --optimize-autoloader
 
-        # Importmap vendors (résout @hotwired/stimulus manquant)
-        php bin/console importmap:install --env=prod --no-interaction
+                # Importmap vendors
+                php bin/console importmap:install --env=prod --no-interaction
 
-        # Compile AssetMapper (public/ est writable au build)
-        php bin/console asset-map:compile --env=prod --no-interaction
+                # AssetMapper compile
+                php bin/console asset-map:compile --env=prod --no-interaction
 
-      deploy: |
-        set -e
+            deploy: |
+                set -e
 
-        rm -rf var/cache/prod
+                # On repart propre sur le cache prod
+                rm -rf var/cache/prod
 
-        # Vraie DATABASE_URL depuis les relations Upsun (DB dispo au deploy)
-        export DATABASE_URL="$(echo "$PLATFORM_RELATIONSHIPS" | base64 --decode | jq -r \
-          '.database[0] | "postgresql://\(.username):\(.password)@\(.host):\(.port)/\(.path)?serverVersion=15&charset=utf8"')"
+                # La DB est disponible au deploy (relationships runtime OK)
+                # On reconstruit une DATABASE_URL réelle depuis PLATFORM_RELATIONSHIPS.
+                export DATABASE_URL="$(echo "$PLATFORM_RELATIONSHIPS" | base64 --decode | jq -r \
+                  '.database[0] | "postgresql://\(.username):\(.password)@\(.host):\(.port)/\(.path)?serverVersion=15&charset=utf8"')"
 
-        # Migrations + cache (pas d'écriture dans public/ ici)
-        php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
-        php bin/console cache:clear --env=prod --no-interaction
-
+                php bin/console doctrine:migrations:sync-metadata-storage --no-interaction
+                php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
+                php bin/console cache:clear --env=prod --no-interaction

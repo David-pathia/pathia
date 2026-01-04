@@ -2,14 +2,13 @@ doctrine:
 
     dbal:
         driver: 'pdo_pgsql'
-        host: '%env(DATABASE_HOST)%'
-        port: '%env(int:DATABASE_PORT)%'
-        dbname: '%env(DATABASE_PATH)%'
-        user: '%env(DATABASE_USERNAME)%'
-        password: '%env(DATABASE_PASSWORD)%'
+        host: '%env(default::DATABASE_HOST)%'
+        port: '%env(default::DATABASE_PORT)%'
+        dbname: '%env(default::DATABASE_PATH)%'
+        user: '%env(default::DATABASE_USERNAME)%'
+        password: '%env(default::DATABASE_PASSWORD)%'
         server_version: '15'
-        charset: utf8
-  
+
     orm:
         auto_generate_proxy_classes: true
         enable_lazy_ghost_objects: true
