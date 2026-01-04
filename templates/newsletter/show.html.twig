@@ -1,0 +1,85 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}
+    {{ newsletter.title }} — PathIA
+{% endblock %}
+
+{% block body %}
+    <div class="container pathia-newsletter">
+
+        {# ===== HEADER ===== #}
+        <header class="nl-header">
+            <h1 class="nl-title">{{ newsletter.title }}</h1>
+
+            {% if newsletter.publishedAt %}
+                <p class="nl-meta">
+                    Publication : {{ newsletter.publishedAt|date('d/m/Y') }}
+                </p>
+            {% endif %}
+        </header>
+
+        {# ===== CONTENT ===== #}
+        <section class="nl-body">
+
+            {% if hasFullAccess %}
+                <article class="nl-content">
+                    {{ newsletter.content|nl2br }}
+                </article>
+            {% else %}
+                <article class="nl-excerpt">
+                    {{ newsletter.excerpt|nl2br }}
+                </article>
+
+                {# ===== PAYWALL ===== #}
+                <div class="nl-paywall">
+                    <div class="paywall-box">
+                        <h3>Accès restreint</h3>
+                        <p>
+                            Cette analyse fait partie des <strong>protocoles PathIA</strong>.
+                            Les abonnés bénéficient de l’intégralité du contenu, des sources détaillées
+                            et des mises à jour.
+                        </p>
+
+                        <a href="{{ path('app_pricing') }}"
+                           class="btn btn-primary btn-protocol">
+                            Débloquer l’accès complet
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+
+        </section>
+
+        {# ===== SOURCES ===== #}
+        {% if newsletter.sources|length %}
+            <section class="nl-sources">
+                <h2>Sources & références</h2>
+
+                <ul class="sources-list">
+                    {% for source in newsletter.sources %}
+                        <li class="source-item">
+                            <a href="{{ source.url }}"
+                               target="_blank"
+                               rel="noopener noreferrer">
+                                {{ source.label }}
+                            </a>
+
+                            {% if source.publisher %}
+                                <span class="source-publisher">
+                                — {{ source.publisher }}
+                            </span>
+                            {% endif %}
+
+                            {% if source.publishedAt %}
+                                <span class="source-date">
+                                ({{ source.publishedAt|date('Y') }})
+                            </span>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </section>
+        {% endif %}
+
+    </div>
+{% endblock %}

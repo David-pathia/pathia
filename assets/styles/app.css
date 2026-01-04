@@ -203,3 +203,12 @@ html, body {
 /* 7. UTILITAIRES */
 .text-gold { color: var(--stark-gold); }
 .text-red { color: var(--stark-red); }
+
+/* 8. NEWSLETTERS (INDEX STARK) */
+.newsletter-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 30px;
+    justify-content: center;
+    padding: 20px 0;
+}

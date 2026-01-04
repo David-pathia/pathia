@@ -4,9 +4,8 @@ namespace App\Controller\Admin;
 
 use App\Entity\SubscriptionPlan;
 use EasyCorp\Bundle\EasyAdminBundle\Controller\AbstractCrudController;
-use EasyCorp\Bundle\EasyAdminBundle\Field\IdField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextEditorField;
-use EasyCorp\Bundle\EasyAdminBundle\Field\TextField;
+use EasyCorp\Bundle\EasyAdminBundle\Field\{TextField, MoneyField, BooleanField, TextareaField, AssociationField};
+use EasyCorp\Bundle\EasyAdminBundle\Config\Crud;
 
 class SubscriptionPlanCrudController extends AbstractCrudController
 {
@@ -15,14 +14,21 @@ class SubscriptionPlanCrudController extends AbstractCrudController
         return SubscriptionPlan::class;
     }
 
-    /*
+    public function configureCrud(Crud $crud): Crud
+    {
+        return $crud->setDefaultSort(['id' => 'DESC']);
+    }
+
     public function configureFields(string $pageName): iterable
     {
-        return [
-            IdField::new('id'),
-            TextField::new('title'),
-            TextEditorField::new('description'),
-        ];
+        yield TextField::new('name');
+        yield MoneyField::new('price')->setCurrency('EUR');
+        yield TextareaField::new('description')->hideOnIndex();
+        yield BooleanField::new('enligne');
+
+        // ✅ LE CHAMP QUI TE MANQUE :
+        yield AssociationField::new('features')
+            ->setHelp('Features incluses dans ce plan (ex: Newsletter IA hebdomadaire).')
+            ->setFormTypeOption('by_reference', false);
     }
-    */
 }

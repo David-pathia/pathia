@@ -152,4 +152,8 @@ class SubscriptionPlan
 
         return $this;
     }
+    public function __toString(): string
+    {
+        return $this->name ?? 'Plan';
+    }
 }

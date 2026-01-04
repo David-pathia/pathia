@@ -49,7 +49,7 @@ class AppAuthenticator extends AbstractLoginFormAuthenticator
             return new RedirectResponse($targetPath);
         }
 
-        return new RedirectResponse($this->urlGenerator->generate('app_pricing'));
+        return new RedirectResponse($this->urlGenerator->generate('app_newsletter_index'));
     }
 
     protected function getLoginUrl(Request $request): string

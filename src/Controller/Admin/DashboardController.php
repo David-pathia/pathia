@@ -13,6 +13,8 @@ use EasyCorp\Bundle\EasyAdminBundle\Router\AdminUrlGenerator;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Entity\Newsletter;
+use App\Entity\Feature;
 
 #[IsGranted('ROLE_ADMIN')]
 class DashboardController extends AbstractDashboardController
@@ -69,10 +71,15 @@ class DashboardController extends AbstractDashboardController
         yield MenuItem::section('Contrôle des Unités');
         yield MenuItem::linkToCrud('Utilisateurs', 'fas fa-user-shield', User::class);
 
+        yield MenuItem::section('Protocoles - Accès');
+        yield MenuItem::linkToCrud('Features', 'fa fa-key', Feature::class);
+
         yield MenuItem::section('Protocoles Financiers');
         yield MenuItem::linkToCrud('Abonnements', 'fas fa-file-invoice-dollar', Subscription::class);
         yield MenuItem::linkToCrud('Plans Tarifaires', 'fas fa-layer-group', SubscriptionPlan::class);
 
+        yield MenuItem::section('Protocoles éditoriaux');
+        yield MenuItem::linkToCrud('Newsletters', 'fa fa-newspaper', Newsletter::class);
         yield MenuItem::section('Système');
         yield MenuItem::linkToLogout('Déconnexion', 'fas fa-sign-out-alt');
     }

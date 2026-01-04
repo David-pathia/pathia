@@ -1,0 +1,62 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Newsletters — PathIA{% endblock %}
+
+{% block body %}
+    <div class="d-flex align-items-center justify-content-between mb-4">
+        <div>
+            <h1 class="display-6 fw-bold mb-1">
+                <span class="text-red">PROTOCOLES</span> — Newsletters
+            </h1>
+            <p class="text-secondary mb-0">
+                Sélectionne un rapport. Accès complet selon ton abonnement.
+            </p>
+        </div>
+
+        {% if not hasFullAccess %}
+            <a class="btn btn-protocol" style="width:auto; padding: 12px 18px;" href="{{ path('app_pricing') }}">
+                Débloquer l’accès
+            </a>
+        {% endif %}
+    </div>
+
+    <div class="newsletter-grid">
+        {% if newsletters is empty %}
+            <div class="stark-card">
+                <h3 class="text-gold">Aucune newsletter publiée</h3>
+                <p class="text-secondary mb-0">Publie une newsletter dans l’admin pour la voir apparaître ici.</p>
+            </div>
+        {% endif %}
+
+        {% for nl in newsletters %}
+            <div class="card-stark">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h3 class="mb-1">{{ nl.title }}</h3>
+                        {% if nl.publishedAt %}
+                            <div class="text-secondary small mb-3">
+                                <i class="bi bi-calendar-event me-1"></i>{{ nl.publishedAt|date('d/m/Y') }}
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    {% if hasFullAccess %}
+                        <span class="badge text-bg-success">Accès complet</span>
+                    {% else %}
+                        <span class="badge text-bg-secondary">Extrait 30%</span>
+                    {% endif %}
+                </div>
+
+                <div class="text-secondary small" style="flex:1;">
+                    {{ nl.excerpt|u.truncate(220, '…', false)|nl2br }}
+                </div>
+
+                <div class="mt-4">
+                    <a class="btn-protocol" href="{{ path('newsletter_show', {slug: nl.slug}) }}">
+                        Ouvrir le rapport
+                    </a>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+{% endblock %}
