@@ -4,9 +4,14 @@ applications:
 
     variables:
       env:
-        APP_ENV: prod
-        APP_DEBUG: 0
+        APP_ENV: "prod"
+        APP_DEBUG: "0"
+        # Empêche Symfony Flex de lancer des auto-scripts via composer
         SYMFONY_SKIP_AUTO_SCRIPTS: "1"
+
+    relationships:
+      database: "db:postgresql"
+
     mounts:
       "var":
         source: local
@@ -23,34 +28,43 @@ applications:
       php:
         composer/composer: "^2"
 
-    relationships:
-      database: "db:postgresql"
-
     web:
       locations:
         "/":
           root: "public"
           passthru: "/index.php"
+          index:
+            - index.php
 
     hooks:
       build: |
         set -e
-        # 1. Installation des dépendances sans exécuter les scripts (évite les erreurs de DB)
-        composer install --no-dev --prefer-dist --optimize-autoloader --no-scripts
-        
-        # 2. FIX CSS : Compilation des assets pour la production
-        php bin/console asset-mapper:compile
+
+        # Build = uniquement installation + optimisation autoload (pas de boot Symfony, pas de DB)
+        composer install \
+          --no-dev \
+          --prefer-dist \
+          --no-interaction \
+          --no-progress \
+          --no-scripts \
+          --optimize-autoloader
 
       deploy: |
         set -e
-        # 1. Nettoyage du cache de build pour éviter les conflits
+
+        # Nettoyage cache (safe)
         rm -rf var/cache/prod
-        
-        # 2. Extraction manuelle de la DATABASE_URL depuis les relations Upsun
-        export DATABASE_URL=$(echo $PLATFORM_RELATIONSHIPS | base64 --decode | jq -r '.database[0] | "postgresql://\(.username):\(.password)@\(.host):\(.port)/\(.path)?serverVersion=15"')
-        
-        # 3. Exécution des migrations sur la base PostgreSQL
+
+        # Construit DATABASE_URL à partir des relations Upsun (DB dispo au deploy)
+        export DATABASE_URL="$(echo "$PLATFORM_RELATIONSHIPS" | base64 --decode | jq -r \
+          '.database[0] | "postgresql://\(.username):\(.password)@\(.host):\(.port)/\(.path)?serverVersion=15&charset=utf8"')"
+
+        # Migrations
         php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
-        
-        # 4. Préchauffage final du cache
-        php bin/console cache:clear
+
+        # Assets (AssetMapper) — à faire au deploy (boot Symfony OK ici)
+        php bin/console asset-mapper:compile --env=prod --no-interaction
+
+        # Cache prod final
+        php bin/console cache:clear --env=prod --no-interaction
+
