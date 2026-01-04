@@ -39,7 +39,9 @@ applications:
       build: |
         set -e
 
-        # Installation dépendances (sans scripts)
+        # Fake DATABASE_URL to prevent Doctrine crash during build
+        export DATABASE_URL="postgresql://user:pass@127.0.0.1:5432/dummy?serverVersion=15"
+
         composer install \
           --no-dev \
           --prefer-dist \
@@ -48,22 +50,18 @@ applications:
           --no-scripts \
           --optimize-autoloader
 
-        # Compilation AssetMapper AU BUILD (filesystem writable ici)
+        # AssetMapper MUST run at build (public/ writable here)
         php bin/console asset-map:compile --env=prod --no-interaction
 
       deploy: |
         set -e
 
-        # Nettoyage cache
         rm -rf var/cache/prod
 
-        # DATABASE_URL depuis les relations Upsun
+        # Real DATABASE_URL from Upsun relationships
         export DATABASE_URL="$(echo "$PLATFORM_RELATIONSHIPS" | base64 --decode | jq -r \
           '.database[0] | "postgresql://\(.username):\(.password)@\(.host):\(.port)/\(.path)?serverVersion=15&charset=utf8"')"
 
-        # Migrations (DB dispo ici)
         php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
-
-        # Cache final
         php bin/console cache:clear --env=prod --no-interaction
 
