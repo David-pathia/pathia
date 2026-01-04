@@ -34,3 +34,4 @@ applications:
         rm -rf var/cache/prod
         php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
         php bin/console cache:clear
+# Rebuild forced
