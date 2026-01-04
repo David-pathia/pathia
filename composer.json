@@ -82,10 +82,12 @@
             "importmap:install": "symfony-cmd"
         },
         "post-install-cmd": [
-            "@auto-scripts"
+            "export DATABASE_URL=sqlite:///:memory:",
+	    "@auto-scripts"
         ],
         "post-update-cmd": [
-            "@auto-scripts"
+            "export DATABASE_URL=sqlite:///:memory:",
+	    "@auto-scripts"
         ]
     },
     "conflict": {
