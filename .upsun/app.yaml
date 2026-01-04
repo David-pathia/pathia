@@ -39,7 +39,7 @@ applications:
       build: |
         set -e
 
-        # Build = filesystem only (no Symfony boot, no DB)
+        # Installation dépendances (sans scripts)
         composer install \
           --no-dev \
           --prefer-dist \
@@ -48,21 +48,21 @@ applications:
           --no-scripts \
           --optimize-autoloader
 
+        # Compilation AssetMapper AU BUILD (filesystem writable ici)
+        php bin/console asset-map:compile --env=prod --no-interaction
+
       deploy: |
         set -e
 
         # Nettoyage cache
         rm -rf var/cache/prod
 
-        # DATABASE_URL depuis Upsun
+        # DATABASE_URL depuis les relations Upsun
         export DATABASE_URL="$(echo "$PLATFORM_RELATIONSHIPS" | base64 --decode | jq -r \
           '.database[0] | "postgresql://\(.username):\(.password)@\(.host):\(.port)/\(.path)?serverVersion=15&charset=utf8"')"
 
-        # Migrations
+        # Migrations (DB dispo ici)
         php bin/console doctrine:migrations:migrate --no-interaction --allow-no-migration
-
-        # Assets AssetMapper (BONNE COMMANDE)
-        php bin/console asset-map:compile --env=prod --no-interaction
 
         # Cache final
         php bin/console cache:clear --env=prod --no-interaction
