@@ -6,7 +6,7 @@ applications:
       env:
         APP_ENV: prod
         APP_DEBUG: 0
-
+        SYMFONY_SKIP_AUTO_SCRIPTS: "1"
     mounts:
       "var":
         source: local
